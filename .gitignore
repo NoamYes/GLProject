@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+trajectories.npy
+trajectories_z.npz
+trajectories_z.npy.npz

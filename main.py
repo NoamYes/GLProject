@@ -72,5 +72,13 @@ anim = animation.FuncAnimation(fig, connect, np.arange(1, t_vec.size), interval=
 # ax.set_xlim(-1,1)
 # ax.set_ylim(-1,1)
 
-plt.show()
+# plt.show()
+
+from diffusion import Q_eps, assemble_sim_matrix
+
+## Flatten trajectories data to m tranjectories
+trajectories = trajectories.reshape(-1, trajectories.shape[-2], trajectories.shape[-1])
+m = trajectories.shape[0]
+idx, D = Q_eps(trajectories, r=0.01, eps=1)
+assemble_sim_matrix(idx, D, m, eps=1)
 print('ya')

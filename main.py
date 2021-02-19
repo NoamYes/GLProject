@@ -36,9 +36,8 @@ def double_gyre_system(y, t, A, alpha, omega, f, f_x):
     y2 = np.pi*A*np.cos(np.pi*f(t, y[0]))*np.sin(np.pi*y[1])*f_x(t, y[0])
     return np.array([y1, y2])
 
-trajectories =  np.load('trajectories.npy')
+trajectories =  np.load('data/trajectories.npy')
 # trajectories = x_grid.tolist()
-# trajectories = np.repeat(trajectories[:, :, np.newaxis], t_vec.size, axis=2)
 
 # for row_idx in range(x_grid.shape[0]):
 #     for col_idx in range(x_grid.shape[1]):
@@ -64,21 +63,19 @@ def connect(i):
             traj = traj + 1
     return lines
 
-
-
      
 anim = animation.FuncAnimation(fig, connect, np.arange(1, t_vec.size), interval=5)
 
-# ax.set_xlim(-1,1)
-# ax.set_ylim(-1,1)
-
 # plt.show()
+
+## Compute Qeps / Load from pre-computed
 
 from diffusion import Q_eps, assemble_sim_matrix
 
 ## Flatten trajectories data to m tranjectories
 trajectories = trajectories.reshape(-1, trajectories.shape[-2], trajectories.shape[-1])
 m = trajectories.shape[0]
-idx, D = Q_eps(trajectories, r=0.01, eps=1)
-assemble_sim_matrix(idx, D, m, eps=1)
+# Qeps = Q_eps(trajectories, r=1, eps=1)
+Qeps =  np.load('data/Q_eps.npy', allow_pickle=True)[()]
+
 print('ya')

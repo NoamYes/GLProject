@@ -130,3 +130,5 @@ dmypy.json
 trajectories.npy
 trajectories_z.npz
 trajectories_z.npy.npz
+Q_eps.npy
+data/

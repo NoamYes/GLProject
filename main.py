@@ -2,7 +2,9 @@ import numpy as np
 from scipy import integrate
 import matplotlib.pyplot as plt
 from matplotlib import animation, rc
-
+from scipy.sparse.linalg import eigs
+from scipy import sparse
+import itertools
 ## Generate the Double gyre flow
 
 ## Define constants
@@ -19,8 +21,8 @@ omega = 2*np.pi
 # f_x = lambdify([t,x], f_x_exp, modules=['numpy', 'math'])
 # f = theano_function([t,x], [f_exp], dims={t: 3, x: 3})
 
-x_vec = np.arange(100)/100
-y_vec = 2*np.arange(200)/200
+y_vec = np.arange(100)/100
+x_vec = 2*np.arange(200)/200
 T = 201
 t_vec = 20*np.arange(T)/T
 
@@ -46,7 +48,7 @@ trajectories =  np.load('data/trajectories.npy')
 #         trajectories[row_idx][col_idx] = sol
 
 
-fig, ax = plt.subplots()
+fig1, ax = plt.subplots()
 lines = []
 for start_x in range(0, x_vec.size, 10):
     for start_y in range(0, y_vec.size, 10):
@@ -64,18 +66,46 @@ def connect(i):
     return lines
 
      
-anim = animation.FuncAnimation(fig, connect, np.arange(1, t_vec.size), interval=5)
-
+anim = animation.FuncAnimation(fig1, connect, np.arange(1, t_vec.size), interval=5)
+plt.xlim([0, 2])
+plt.ylim([0, 1])
 # plt.show()
 
 ## Compute Qeps / Load from pre-computed
 
-from diffusion import Q_eps, assemble_sim_matrix
+from diffusion import Q_eps, computeQ_eigVals
 
 ## Flatten trajectories data to m tranjectories
 trajectories = trajectories.reshape(-1, trajectories.shape[-2], trajectories.shape[-1])
 m = trajectories.shape[0]
-# Qeps = Q_eps(trajectories, r=1, eps=1)
-Qeps =  np.load('data/Q_eps.npy', allow_pickle=True)[()]
 
+## Scatter the eigenValues of different epsilons
+
+fig2 = plt.figure(2, figsize=(14,6))
+ax1 = fig2.add_subplot(1,2,1)
+ax2 = fig2.add_subplot(1, 2, 2)
+
+eps_list = [0.0002, 0.0005, 0.001, 0.002]
+markers = itertools.cycle((',', '+', '.', 'o', '*')) 
+colors = itertools.cycle(('b', 'r', 'y', 'g', 'm')) 
+r = 1
+
+for eps in eps_list:
+	Qeps = Q_eps(trajectories, r=r, eps=eps, load_cached=True)
+	Q_eigVals, Q_eigVecs = computeQ_eigVals(Qeps, r=r, eps=eps, k=10, load_cached=True)
+	L_eigVals = (Q_eigVals - 1)/eps
+	color = next(colors)
+	marker=next(markers)
+	ax1.scatter(range(Q_eigVals.size), Q_eigVals, s=20, c=color, marker=marker, label=r'$\epsilon=$'+str(eps))
+	ax2.scatter(range(L_eigVals.size), L_eigVals, s=20, c=color, marker=marker, label=r'$\epsilon=$'+str(eps))      
+	ax1.legend(loc='upper right')
+	ax2.legend(loc='upper right')
+
+ax1.set_xlabel('n')
+ax1.set_ylabel(r'$\lambda_n$')
+ax1.set_title('Scatter eigenValues of ' + r'$Q_{\epsilon}$' + ' for various ' + r'$\epsilon$' + ' values')
+ax2.set_xlabel('n')
+ax2.set_ylabel(r'$\lambda_n$')
+ax2.set_title('Scatter eigenValues of ' + r'$L_{\epsilon}$' + ' for various ' + r'$\epsilon$' + ' values')
+plt.show()
 print('ya')

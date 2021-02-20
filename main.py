@@ -53,22 +53,24 @@ lines = []
 for start_x in range(0, x_vec.size, 10):
     for start_y in range(0, y_vec.size, 10):
         trajectory = trajectories[:][start_y,start_x]
-        lines.append(ax.plot(trajectory[0], trajectory[1], "ro-"))
+        lines.append(ax.plot(trajectory[0], trajectory[1]))
 
 def connect(i):
     traj = 0
     for start_x in range(0, x_vec.size, 10):
         for start_y in range(0, y_vec.size, 10):
             trajectory = trajectories[:][start_y,start_x]
-            start=max((i-5,0))
+            start=max((i-3,0))
+			
             lines[traj][0].set_data(trajectory[start:i,0],trajectory[start:i,1])
             traj = traj + 1
     return lines
 
      
-anim = animation.FuncAnimation(fig1, connect, np.arange(1, t_vec.size), interval=5)
+anim = animation.FuncAnimation(fig1, connect, range(x_vec.size*y_vec.size-1), interval=1)
 plt.xlim([0, 2])
 plt.ylim([0, 1])
+plt.title('Samples of ' + str(len(lines)) + ' Trajectories computed by the solving the ODE \n Memory of 5 last points')
 # plt.show()
 
 ## Compute Qeps / Load from pre-computed
@@ -108,4 +110,8 @@ ax2.set_xlabel('n')
 ax2.set_ylabel(r'$\lambda_n$')
 ax2.set_title('Scatter eigenValues of ' + r'$L_{\epsilon}$' + ' for various ' + r'$\epsilon$' + ' values')
 plt.show()
+
+## 3 - Clustering at t = 0 and t = 19.5
+
+
 print('ya')

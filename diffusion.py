@@ -4,6 +4,7 @@ from scipy import spatial
 from sklearn import neighbors
 from scipy.sparse.linalg import eigs
 import os.path
+from tqdm import tqdm
 
 def h(x):
     r = 1
@@ -22,7 +23,7 @@ def Q_eps(pts, r, eps, load_cached=True):
         T = pts.shape[1]
         Q = sparse.coo_matrix((m,m), dtype=float)
         rang = np.sqrt(r*eps)
-        for t in range(T):
+        for t in tqdm(range(T)):
             data = pts[:,t,:]
             res = sparse.csr_matrix(neighbors.radius_neighbors_graph(data, radius=rang, mode='distance'))
             idx_list = np.split(res.indices, res.indptr)[1:-1]

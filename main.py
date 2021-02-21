@@ -13,14 +13,6 @@ alpha = 0.25
 A = 0.25
 omega = 2*np.pi
 
-# x, y, t = sp.symbols("x y t")
-# f_exp = alpha*sp.sin(omega*t)*x**2+(1-2*alpha*sp.sin(omega*t))*x
-# f_x_exp = 2*alpha*sp.sin(omega*t)*x+(1-2*alpha*sp.sin(omega*t))
-# f_exp = sin(t)+x
-# f = lambdify([t,x], f_exp, modules=['numpy', 'math'])
-# f_x = lambdify([t,x], f_x_exp, modules=['numpy', 'math'])
-# f = theano_function([t,x], [f_exp], dims={t: 3, x: 3})
-
 y_vec = np.arange(100)/100
 x_vec = 2*np.arange(200)/200
 T = 201
@@ -50,27 +42,29 @@ trajectories =  np.load('data/trajectories.npy')
 
 fig1, ax = plt.subplots()
 lines = []
-for start_x in range(0, x_vec.size, 10):
-    for start_y in range(0, y_vec.size, 10):
-        trajectory = trajectories[:][start_y,start_x]
-        lines.append(ax.plot(trajectory[0], trajectory[1]))
+# for start_x in range(0, x_vec.size, 4):
+#     for start_y in range(0, y_vec.size, 4):
+#         trajectory = trajectories[:][start_y,start_x]
+#         lines.append(ax.scatter(trajectory[0], trajectory[1]))
+c = x_grid
+scat = ax.scatter(x_grid, y_grid, c=c, s=10, cmap='turbo')
+
+# plt.show()
 
 def connect(i):
-    traj = 0
-    for start_x in range(0, x_vec.size, 10):
-        for start_y in range(0, y_vec.size, 10):
-            trajectory = trajectories[:][start_y,start_x]
-            start=max((i-3,0))
-			
-            lines[traj][0].set_data(trajectory[start:i,0],trajectory[start:i,1])
-            traj = traj + 1
-    return lines
+    # x_new = trajectories[:,:,i,0]
+    # y_new = trajectories[:,:,i,1]
+    scat.set_offsets(trajectories[:,:,i,:].reshape(-1,2))
+    # scat.set_array(color_func-i/100)
+    # scat.set_color(color_func.reshape(-1,4)-(i/500)*np.ones((1,4)))
+    return scat, 
 
      
-anim = animation.FuncAnimation(fig1, connect, range(x_vec.size*y_vec.size-1), interval=1)
+anim = animation.FuncAnimation(fig1, connect, range(t_vec.size), interval=50)
+# anim.save('double_gyre_trajectories.mp4')
 plt.xlim([0, 2])
 plt.ylim([0, 1])
-plt.title('Samples of ' + str(len(lines)) + ' Trajectories computed by the solving the ODE \n Memory of 5 last points')
+plt.title('Samples of ' + str(len(lines)) + ' Trajectories computed by the solving the ODE')
 # plt.show()
 
 ## Compute Qeps / Load from pre-computed
@@ -87,7 +81,7 @@ fig2 = plt.figure(2, figsize=(14,6))
 ax1 = fig2.add_subplot(1,2,1)
 ax2 = fig2.add_subplot(1, 2, 2)
 
-eps_list = [0.0002, 0.0005, 0.001, 0.002]
+eps_list = [0.0001, 0.0002, 0.0005, 0.001, 0.002]
 markers = itertools.cycle((',', '+', '.', 'o', '*')) 
 colors = itertools.cycle(('b', 'r', 'y', 'g', 'm')) 
 r = 1

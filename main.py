@@ -81,13 +81,14 @@ fig2 = plt.figure(2, figsize=(14,6))
 ax1 = fig2.add_subplot(1,2,1)
 ax2 = fig2.add_subplot(1, 2, 2)
 
-eps_list = [0.0001, 0.0002, 0.0005, 0.001, 0.002]
+eps_list = [0.0002, 0.0005, 0.001, 0.002]
 markers = itertools.cycle((',', '+', '.', 'o', '*')) 
 colors = itertools.cycle(('b', 'r', 'y', 'g', 'm')) 
-r = 1
+r = 2
 
 for eps in eps_list:
-	Qeps = Q_eps(trajectories, r=r, eps=eps, load_cached=True)
+	Qeps_list = Q_eps(trajectories, r=r, eps=eps, load_cached=True)
+	Qeps = Qeps_list[-1]
 	Q_eigVals, Q_eigVecs = computeQ_eigVals(Qeps, r=r, eps=eps, k=10, load_cached=True)
 	L_eigVals = (Q_eigVals - 1)/eps
 	color = next(colors)
@@ -107,5 +108,16 @@ plt.show()
 
 ## 3 - Clustering at t = 0 and t = 19.5
 
-
+for eps in eps_list:
+	Qeps_list = Q_eps(trajectories, r=r, eps=eps, load_cached=True)
+	Qeps = Qeps_list[-1]
+	Q_eigVals, Q_eigVecs = computeQ_eigVals(Qeps, r=r, eps=eps, k=10, load_cached=True)
+	L_eigVals = (Q_eigVals - 1)/eps
+	color = next(colors)
+	marker=next(markers)
+	ax1.scatter(range(Q_eigVals.size), Q_eigVals, s=20, c=color, marker=marker, label=r'$\epsilon=$'+str(eps))
+	ax2.scatter(range(L_eigVals.size), L_eigVals, s=20, c=color, marker=marker, label=r'$\epsilon=$'+str(eps))      
+	ax1.legend(loc='upper right')
+	ax2.legend(loc='upper right')
+	
 print('ya')

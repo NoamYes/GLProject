@@ -14,10 +14,12 @@ def h(x):
 def k_eps(x1, x2, eps):
     return h(np.norm(x1-x2)**2/eps)
 
-def Q_eps(pts, r, eps, load_cached=True):
+## Returns a list of Q_eps for given frequency (every "freq" samples)
+def Q_eps(pts, r, eps, load_cached=True, sample_freq=50):
     my_file = 'data/Q_' + str(r) + '_' + str(eps) + '.npy'
+    Q_list = []
     if os.path.isfile(my_file):
-        Q = np.load(my_file, allow_pickle=True)[()]
+        Q_list = np.load(my_file, allow_pickle=True)[()]
     else:
         m = pts.shape[0]
         T = pts.shape[1]
@@ -35,13 +37,12 @@ def Q_eps(pts, r, eps, load_cached=True):
             depsi = np.squeeze(np.asarray(depsi))
             B = sparse.diags(depsi) @ Pepsi.T @ Pepsi
             Q = Q + B
-        Q = Q/T
-        np.save(my_file, Q) 
+            if not (t % sample_freq) : Q_list.append(Q/(t+1))
+        np.save(my_file, Q_list) 
         
-    return Q
+    return Q_list
 
 def assemble_sim_matrix(idx, D, m, eps):
-    icurr = 0
     x = np.concatenate([idx*np.ones(val.size) for idx, val in enumerate(idx)])
     y = np.concatenate(idx)
     v = D.data

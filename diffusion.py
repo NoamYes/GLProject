@@ -65,7 +65,8 @@ def computeQ_eigVals(Qeps, r, eps, k=15, load_cached=True):
     return Q_eigenVals, Q_eigenVecs.T
         
 
-def cluster_eigVectors(eig_vecs, space_pts, n_clusters=2):
+def cluster_eigVectors(eig_vecs, n_clusters=2):
     eig_vecs = eig_vecs / np.linalg.norm(eig_vecs, axis=1, keepdims=True)
-    kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(eig_vecs)
-    label_space = kmeans.predict(space_pts.T)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(eig_vecs.T)
+    label_space = kmeans.labels_
+    return label_space

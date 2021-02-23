@@ -5,6 +5,7 @@ from sklearn import neighbors
 from scipy.sparse.linalg import eigs
 import os.path
 from tqdm import tqdm
+from sklearn.cluster import KMeans
 
 def h(x):
     r = 1
@@ -55,12 +56,16 @@ def computeQ_eigVals(Qeps, r, eps, k=15, load_cached=True):
     if os.path.isfile(my_file):
         Q_eigenVals, Q_eigenVecs = np.load(my_file, allow_pickle=True)
     else:
-        eigs_res = eigs(Qeps, k=k)
+        eigs_res = eigs(Qeps, k=k, which='LM')
         np.save(my_file, eigs_res)
         Q_eigenVals, Q_eigenVecs = eigs_res
-    idx_pn = np.abs(Q_eigenVals).argsort()[::-1]
-    Q_eigenVals = Q_eigenVals[idx_pn]
-    Q_eigenVecs = Q_eigenVecs[:, idx_pn]
-    return Q_eigenVals, Q_eigenVecs
+    idx_pn = Q_eigenVals.argsort()[::-1]
+    Q_eigenVals = np.real(Q_eigenVals[idx_pn])
+    Q_eigenVecs = np.real(Q_eigenVecs[:, idx_pn])
+    return Q_eigenVals, Q_eigenVecs.T
         
 
+def cluster_eigVectors(eig_vecs, space_pts, n_clusters=2):
+    eig_vecs = eig_vecs / np.linalg.norm(eig_vecs, axis=1, keepdims=True)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(eig_vecs)
+    label_space = kmeans.predict(space_pts.T)

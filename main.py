@@ -31,21 +31,27 @@ pts = trajectories
 eps_list = [0.0002, 0.0005, 0.001, 0.002]
 r = 2
 
-## Compute Qeps / Load from pre-computed
+## Create class of data analysis for the double gyre dataset
 
-from plotters import eig_vals_plot, plot_eigenfuncs_at_times, cluster_2_labels
+from data_class_plotters import DataAnalysis
+double_gyre_class = DataAnalysis(pts, 'doubleGyre')
+
+## Compute Qeps / Load from pre-computed
 
 ## Plot the largest eigenfunctions of the Q_eps and the Laplacian
 
-# eig_vals_plot(pts, r, eps_list, fig=None, show=True)
+double_gyre_class.eig_vals_plot(r, eps_list, fig=None, show=True)
 
 ## Plot the eigenfunctions at various times
 
-plot_eigenfuncs_at_times(pts, img_shape, t_vec, r, eps_list, cmap=plt.cm.PuBu, show=True)
+double_gyre_class.plot_eigenfuncs_at_times(img_shape, t_vec, r, eps_list, cmap=plt.cm.PuBu, show=True)
 
 ## Cluster into 2 labels
 
 eps_list = [0.0002]
 # eps_list = [0.0002, 0.0005, 0.001, 0.002]
 
-cluster_2_labels(pts, img_shape, t_vec, r, eps_list, cmap=plt.cm.PuBu, show=True)
+double_gyre_class.cluster_2_labels(img_shape, t_vec, r, eps_list, cmap=plt.cm.PuBu, show=True)
+
+## Load Bickley Jet
+

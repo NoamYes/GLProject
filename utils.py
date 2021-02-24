@@ -16,8 +16,8 @@ def k_eps(x1, x2, eps):
     return h(np.norm(x1-x2)**2/eps)
 
 ## Returns a list of Q_eps for given frequency (every "freq" samples)
-def Q_eps(pts, r, eps, load_cached=True, sample_freq=50):
-    my_file = 'data/Q_' + str(r) + '_' + str(eps) + '.npy'
+def Q_eps(pts, r, eps, load_cached=True, sample_freq=50, dir_name=None):
+    my_file = 'data/' + str(dir_name) + '/Q_' + str(r) + '_' + str(eps) + '.npy'
     Q_list = []
     if os.path.isfile(my_file):
         Q_list = np.load(my_file, allow_pickle=True)[()]
@@ -51,8 +51,8 @@ def assemble_sim_matrix(idx, D, m, eps):
     K = K - sparse.diags(K.diagonal()) + sparse.eye(m,m)  
     return K
 
-def computeQ_eigVals(Qeps, r, eps, k=15, load_cached=True):
-    my_file = 'data/eigs_' + str(r) + '_' + str(eps) + '_k_' +str(k) + '.npy'
+def computeQ_eigVals(Qeps, r, eps, k=15, load_cached=True, dir_name=None):
+    my_file = 'data/' + str(dir_name) + '/eigs_' + str(r) + '_' + str(eps) + '_k_' +str(k) + '.npy'
     if os.path.isfile(my_file):
         Q_eigenVals, Q_eigenVecs = np.load(my_file, allow_pickle=True)
     else:

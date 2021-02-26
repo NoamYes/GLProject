@@ -51,18 +51,21 @@ def assemble_sim_matrix(idx, D, m, eps):
     K = K - sparse.diags(K.diagonal()) + sparse.eye(m,m)  
     return K
 
-def computeQ_eigVals(Qeps, r, eps, k=15, load_cached=True, dir_name=None):
+def computeQ_eigVals(Qeps_list, r, eps, k=15, load_cached=True, dir_name=None):
     my_file = 'data/' + str(dir_name) + '/eigs_' + str(r) + '_' + str(eps) + '_k_' +str(k) + '.npy'
     if os.path.isfile(my_file):
-        Q_eigenVals, Q_eigenVecs = np.load(my_file, allow_pickle=True)
+        Q_eigs_list = np.load(my_file, allow_pickle=True)[()]
     else:
-        eigs_res = eigs(Qeps, k=k, which='LM')
-        np.save(my_file, eigs_res)
-        Q_eigenVals, Q_eigenVecs = eigs_res
-    idx_pn = Q_eigenVals.argsort()[::-1]
-    Q_eigenVals = np.real(Q_eigenVals[idx_pn])
-    Q_eigenVecs = np.real(Q_eigenVecs[:, idx_pn])
-    return Q_eigenVals, Q_eigenVecs.T
+        Q_eigs_list = []
+        for Qeps in Qeps_list:
+            eigs_res = eigs(Qeps, k=k, which='LM')
+            Q_eigenVals, Q_eigenVecs = eigs_res
+            idx_pn = Q_eigenVals.argsort()[::-1]
+            Q_eigenVals = np.real(Q_eigenVals[idx_pn])
+            Q_eigenVecs = np.real(Q_eigenVecs[:, idx_pn])
+            Q_eigs_list.append([Q_eigenVals, Q_eigenVecs])
+        np.save(my_file,  Q_eigs_list)
+    return Q_eigs_list
         
 
 def cluster_eigVectors(eig_vecs, n_clusters=2):

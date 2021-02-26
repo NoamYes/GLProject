@@ -24,11 +24,11 @@ class DataAnalysis:
             fig = plt.figure(figsize=(14,6))
         ax1 = fig.add_subplot(1,2,1)
         ax2 = fig.add_subplot(1, 2, 2)
-
         for eps in eps_list:
             Qeps_list = Q_eps(pts, r=r, eps=eps, load_cached=True, dir_name=self.dataset_name, sample_freq=int(self.T/4))
-            Qeps = Qeps_list[-1]
-            Q_eigVals, _  = computeQ_eigVals(Qeps, r=r, eps=eps, k=10, load_cached=True, dir_name=self.dataset_name)
+            Q_eigs_list = computeQ_eigVals(Qeps_list, r=r, eps=eps, k=15, load_cached=True, dir_name=self.dataset_name)
+            Q_eigVals, Q_eigVecs = Q_eigs_list[-1]
+            Q_eigVecs = Q_eigVecs.T
             L_eigVals = (Q_eigVals - 1)/eps
             color = next(colors)
             marker=next(markers)
@@ -63,16 +63,18 @@ class DataAnalysis:
 
         for eps in eps_list:
             Qeps_list = Q_eps(pts, r=r, eps=eps, load_cached=True, dir_name=self.dataset_name, sample_freq=int(self.T/4))
-            Qeps_list = Qeps_list[::int(len(Qeps_list)/2)]
+            # Qeps_list = Qeps_list[::int(len(Qeps_list)/2)]
             time_slices = t_vec[-1]*range(len(Qeps_list))/len(Qeps_list)
             fig, axes = plt.subplots(len(Qeps_list), 1, figsize=(12,18), constrained_layout=True)
+            Q_eigs_list = computeQ_eigVals(Qeps_list, r=r, eps=eps, k=15, load_cached=True, dir_name=self.dataset_name)
             for idx, Qeps in enumerate(Qeps_list):
                 t = time_slices[idx]
-                Q_eigVals, Q_eigVecs = computeQ_eigVals(Qeps, r=r, eps=eps, k=15, load_cached=True, dir_name=self.dataset_name)
+                Q_eigVals, Q_eigVecs = Q_eigs_list[idx]
+                Q_eigVecs = Q_eigVecs.T
                 L_eigVals = (Q_eigVals - 1)/eps
                 # deltaEigs = computeLargeDiffSet(L_eigVals, n_largest=3)
                 deltaEigs = self.largest_gap_eigs
-                eigFunc = Q_eigVecs[deltaEigs[1]].reshape(img_shape)
+                eigFunc = Q_eigVecs[1].reshape(img_shape)
                 eigFunc = np.flip(eigFunc, axis=0)
                 im = axes[idx].imshow(np.real(eigFunc), cmap=cmap)
                 axes[idx].set_title('Second Eigenfunction of ' + r'$Q_{\epsilon}$' + ' for time slice t = ' +str(t))
@@ -93,18 +95,20 @@ class DataAnalysis:
         t_vec = self.t_vec
         for eps in eps_list:
             Qeps_list = Q_eps(pts, r=r, eps=eps, load_cached=True, dir_name=self.dataset_name, sample_freq=int(self.T/4))
-            Qeps_list = Qeps_list[::int(len(Qeps_list)/2)]
+            # Qeps_list = Qeps_list[::int(len(Qeps_list)/2)]
+            Q_eigs_list = computeQ_eigVals(Qeps_list, r=r, eps=eps, k=15, load_cached=True, dir_name=self.dataset_name)
             time_slices = t_vec[-1]*range(len(Qeps_list))/len(Qeps_list)
             fig, axes = plt.subplots(len(Qeps_list), 1, figsize=(12,18), constrained_layout=True)
             for idx, Qeps in enumerate(Qeps_list):
                 t = time_slices[idx]
-                Q_eigVals, Q_eigVecs = computeQ_eigVals(Qeps, r=r, eps=eps, k=15, load_cached=True, dir_name=self.dataset_name)
+                Q_eigVals, Q_eigVecs = Q_eigs_list[idx]
+                Q_eigVecs = Q_eigVecs.T
                 L_eigVals = (Q_eigVals - 1)/eps
                 # deltaEigs = computeLargeDiffSet(L_eigVals, n_largest=1)
                 deltaEigs = self.largest_gap_eigs
-                label_space = cluster_eigVectors(Q_eigVecs[deltaEigs[:n_clusters]], n_clusters=n_clusters)
+                label_space = cluster_eigVectors(Q_eigVecs[:n_clusters], n_clusters=n_clusters)
                 label_space = np.reshape(label_space, img_shape)
-                label_space = np.flip(label_space, axis=0)
+                # label_space = np.flip(label_space, axis=0)
                 im = axes[idx].imshow(np.real(label_space), cmap=cmap)
                 axes[idx].set_title('2 Clustering of ' + r'$Q_{\epsilon}$' + ' for time slice t = ' +str(t))
                 axes[idx].set_xlabel('x')

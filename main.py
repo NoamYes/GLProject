@@ -19,7 +19,7 @@ img_shape = x_grid.shape
 
 ## Animate the trajectories 
 
-# animate_double_gyre_flow(x_vec, y_vec, t_vec, fig=None, show=False, save=False)
+# animate_double_gyre_flow(x_vec, y_vec, t_vec, fig=None, show=False, save=True)
 
 ## Flatten trajectories data to m tranjectories
 trajectories = trajectories.reshape(-1, trajectories.shape[-2], trajectories.shape[-1])
@@ -41,18 +41,18 @@ double_gyre_class = DataAnalysis(pts, 'doubleGyre', t_vec, img_shape, largest_ga
 
 ## Plot the largest eigenfunctions of the Q_eps and the Laplacian
 
-# double_gyre_class.eig_vals_plot(r, eps_list, fig=None, show=False)
+double_gyre_class.eig_vals_plot(r, eps_list, fig=None, show=True)
 
 ## Plot the eigenfunctions at various times
 
-# double_gyre_class.plot_eigenfuncs_at_times(r, eps_list, cmap=plt.cm.PuBu, show=False)
+double_gyre_class.plot_eigenfuncs_at_times(r, eps_list, cmap=plt.cm.PuBu, show=True)
 
 ## Cluster into 2 labels
 
 eps_list = [0.0002]
-# eps_list = [0.0002, 0.0005, 0.001, 0.002]
+# eps_list = [0.0002, 0.0005, 0.001, 0.002, 0.004]
 
-# double_gyre_class.cluster_labels(r, eps_list, n_clusters=2, cmap=plt.cm.PuBu, show=False)
+double_gyre_class.cluster_labels(r, eps_list, n_clusters=3, cmap=plt.cm.PuBu, show=True)
 
 ## Load Bickley Jet
 
@@ -78,10 +78,10 @@ bickley_jet_class = DataAnalysis(pts, 'bickleyJet', t_vec, img_shape, largest_ga
 
 ## Plot the largest eigenfunctions of the Q_eps and the Laplacian
 
-eps_list = [0.1, 0.2]
+eps_list = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
 r = 2
 
-# bickley_jet_class.eig_vals_plot(r, eps_list, fig=None, show=True)
+bickley_jet_class.eig_vals_plot(r, eps_list, fig=None, show=True)
 
 ## Plot the eigenfunctions at various times
 

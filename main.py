@@ -8,7 +8,7 @@ import itertools
 
 
 ## Generate the Double gyre flow
-from generate_double_gyre import generate_trajectories, animate_double_gyre_flow
+from generate_double_gyre import generate_trajectories
 
 y_vec = np.arange(100)/100
 x_vec = 2*np.arange(200)/200
@@ -44,19 +44,36 @@ double_gyre_class = DataAnalysis(pts, 'doubleGyre', t_vec, img_shape, largest_ga
 
 ## Plot the largest eigenVals of the Q_eps and the Laplacian
 
-double_gyre_class.eig_vals_plot(r, eps_list, fig=None, show=False)
+# double_gyre_class.eig_vals_plot(r, eps_list, fig=None, show=True)
 
 ## Plot the second eigenfunction at various times
 
-double_gyre_class.plot_eigenfuncs_at_times(r, eps_list, cmap=plt.cm.turbo, show=False)
+# double_gyre_class.plot_eigenfuncs_at_times(r, eps_list, cmap=plt.cm.turbo, show=True)
 
 ## Cluster into 2 labels
 
-double_gyre_class.cluster_labels(r, eps_list, n_clusters=2, cmap='Dark2', show=False)
+# double_gyre_class.cluster_plot(r, eps_list, n_clusters=2, cmap='Dark2', show=True)
+
+## Cluster into 3 labels
+
+double_gyre_class.cluster_plot(r, eps_list, n_clusters=3, cmap='Dark2', show=False)
 
 ## Cluster into 4 labels
 
-double_gyre_class.cluster_labels(r, eps_list, n_clusters=4, cmap='Dark2', show=False)
+# double_gyre_class.cluster_plot(r, eps_list, n_clusters=4, cmap='Dark2', show=True)
+
+## Missing Data Section
+
+# eps_list = [0.01]
+# missing_data, discarded_pts = double_gyre_class.discard_data(remaining_pts_num=500, destroy_rate=0.8)
+# missing_gyre_class = DataAnalysis(missing_data, 'missingGyre', t_vec, img_shape, largest_gap_eigs, time_samples=4)
+# missing_gyre_class.eig_vals_plot(r, eps_list, fig=None, show=False)
+# labeled_data = missing_gyre_class.cluster_labels(missing_data, r, eps=0.01, n_clusters=3)
+# figs, axises = double_gyre_class.cluster_plot(r, [0.004], n_clusters=3, cmap='Dark2', show=False)
+# fig, axes = figs[-1], axises[-1]
+# axes[0].scatter(discarded_pts[:,0,0], discarded_pts[:,0,1], c=labeled_data, s=10, cmap='viridis')
+# plt.show()
+
 
 ## Load Bickley Jet
 
@@ -86,18 +103,19 @@ bickley_jet_class = DataAnalysis(pts, 'bickleyJet', t_vec, img_shape, largest_ga
 
 ## Plot the largest eigenfunctions of the Q_eps and the Laplacian
 
-eps_list = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
+# eps_list = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
+eps_list = [0.02]
 r = 2
 
-bickley_jet_class.eig_vals_plot(r, eps_list, fig=None, show=False)
+bickley_jet_class.eig_vals_plot(r, eps_list, fig=None, show=True)
 
 ## Plot the eigenfunctions at various times
 
-bickley_jet_class.plot_eigenfuncs_at_times(r, eps_list, cmap=plt.cm.turbo, show=False)
+bickley_jet_class.plot_eigenfuncs_at_times(r, eps_list, cmap='Dark2', show=True)
 
 ## Cluster into 2 labels
 
-bickley_jet_class.cluster_labels(r, eps_list, n_clusters=9, cmap=plt.cm.PuBu, show=False)
+bickley_jet_class.cluster_plot(r, eps_list, n_clusters=9, cmap='Dark2', show=True)
 
 
 print('ya')

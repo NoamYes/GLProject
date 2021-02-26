@@ -4,8 +4,11 @@ from matplotlib import animation, rc
 from scipy.sparse.linalg import eigs
 from scipy import sparse
 import itertools
+from os import mkdir
 
 from utils import Q_eps, computeQ_eigVals, cluster_eigVectors
+from pathlib import Path
+
 
 class DataAnalysis:
     def __init__(self, pts, dataset_name, t_vec, img_shape, largest_gap_eigs, time_samples):
@@ -16,6 +19,7 @@ class DataAnalysis:
         self.largest_gap_eigs = largest_gap_eigs
         self.T = t_vec.size
         self.time_slices = np.linspace(0, t_vec.size-5, time_samples).astype('int')
+        Path('./data/' + str(dataset_name)).mkdir(parents=True, exist_ok=True)
 
 
     def animate_data(self, fig=None, cmap='turbo', show=True, save=False):
@@ -93,7 +97,7 @@ class DataAnalysis:
                 L_eigVals = (Q_eigVals - 1)/eps
                 # deltaEigs = computeLargeDiffSet(L_eigVals, n_largest=3)
                 deltaEigs = self.largest_gap_eigs
-                eigFunc = Q_eigVecs[1].reshape(img_shape)
+                eigFunc = Q_eigVecs[2].reshape(img_shape)
                 eigFunc = np.flip(eigFunc, axis=0)
                 pts_t = pts[:, t_slice, :]
                 # x_grid, y_grid = np.meshgrid(pts_t)
@@ -107,26 +111,29 @@ class DataAnalysis:
             plt.show()
 
 
-    ##  2 - Clustering 2 
+    ##  Clustering
+    def cluster_labels(self,pts, r, eps, n_clusters=2):
+        Q_eigs = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
+        Q_eigVals, Q_eigVecs = Q_eigs
+        Q_eigVecs = Q_eigVecs.T
+        label_space = cluster_eigVectors(Q_eigVecs[:n_clusters], n_clusters=n_clusters)
+        return label_space
 
-    def cluster_labels(self, r, eps_list, n_clusters=2, cmap=None, show=True):
+    def cluster_plot(self, r, eps_list, n_clusters=2, cmap=None, show=True):
         pts = self.pts
         m = pts.shape[0]
         img_shape = self.img_shape
         t_vec = self.t_vec
+        figs, axises = [], []
         for eps in eps_list:
-            Q_eigs = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
+            label_space = self.cluster_labels(pts, r, eps, n_clusters=n_clusters)
+            label_space = np.reshape(label_space, img_shape)
+            # label_space = np.flip(label_space, axis=0)
             fig, axes = plt.subplots(self.time_slices.size, 1, figsize=(12,18), constrained_layout=True)
+            figs.append(fig)
+            axises.append(axes)
             for idx, t_slice in enumerate(self.time_slices):
                 t = t_vec[t_slice]
-                Q_eigVals, Q_eigVecs = Q_eigs
-                Q_eigVecs = Q_eigVecs.T
-                L_eigVals = (Q_eigVals - 1)/eps
-                # deltaEigs = computeLargeDiffSet(L_eigVals, n_largest=1)
-                deltaEigs = self.largest_gap_eigs
-                label_space = cluster_eigVectors(Q_eigVecs[:n_clusters], n_clusters=n_clusters)
-                label_space = np.reshape(label_space, img_shape)
-                # label_space = np.flip(label_space, axis=0)
                 pts_t = pts[:, t_slice, :]
                 scat = axes[idx].scatter(pts_t[:,0], pts_t[:,1], c=label_space, s=10, cmap=cmap)
                 axes[idx].set_title(str(n_clusters) + ' Clustering of ' + r'$Q_{\epsilon}$' + ' for time slice t = ' + str(t))
@@ -136,7 +143,18 @@ class DataAnalysis:
             fig.suptitle(r'$\epsilon=$' + str(eps))
         if show == True:
             plt.show()
+        return figs, axises
 
 
-    def discard_data(self, remaining_pts_num=500):
-        m = pts.shape[0]
+    def discard_data(self, remaining_pts_num=500, destroy_rate=0.8, seed=0):
+        np.random.seed(0) 
+        m = self.pts.shape[0]
+        rand_inds = np.random.randint(m, size=remaining_pts_num)
+        remaining_pts = self.pts[rand_inds, :, :]
+        random_destroy = np.random.choice([0, 1], size=(remaining_pts_num), p=[destroy_rate, 1-destroy_rate])
+        remaining_pts[np.where(np.logical_not(random_destroy))] = np.finfo(np.float64).max
+        discarded_pts = remaining_pts[np.where(not np.logical_not(random_destroy))]
+        # remaining_pts[np.where(np.logical_not(random_destroy))] = np.nan
+        return remaining_pts, discarded_pts
+
+

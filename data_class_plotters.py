@@ -8,13 +8,36 @@ import itertools
 from utils import Q_eps, computeQ_eigVals, cluster_eigVectors
 
 class DataAnalysis:
-    def __init__(self, pts, dataset_name, t_vec, img_shape, largest_gap_eigs):
+    def __init__(self, pts, dataset_name, t_vec, img_shape, largest_gap_eigs, time_samples):
         self.pts = pts
         self.dataset_name = dataset_name 
         self.t_vec = t_vec
         self.img_shape = img_shape
         self.largest_gap_eigs = largest_gap_eigs
-        self.T = self.t_vec.size
+        self.T = t_vec.size
+        self.time_slices = np.linspace(0, t_vec.size-5, time_samples).astype('int')
+
+
+    def animate_data(self, fig=None, cmap='turbo', show=True, save=False):
+        pts = self.pts
+        t_vec = self.t_vec
+        if fig == None:
+            fig, ax = plt.subplots()
+        color_func = pts[:,0,0]
+        scat = ax.scatter(pts[:,0,0], pts[:,0,1], c=color_func, s=10, cmap=cmap)
+
+        def connect(i):
+            scat.set_offsets(pts[:,i,:].reshape(-1,2))
+            return scat, 
+        anim = animation.FuncAnimation(fig, connect, range(t_vec.size), interval=50)
+        if save == True:
+            # writer = animation.writers['ffmpeg']
+            anim.save(str(self.dataset_name) + '_animation.gif', writer='pillow', fps=5)
+        plt.xlim([0, 2])
+        plt.ylim([0, 1])
+        plt.title('Animation of ' +str(t_vec.size) + ' time stamps of ' + str(self.dataset_name) + ' flow')
+        if show == True:
+            plt.show()
 
     def eig_vals_plot(self, r, eps_list, fig=None, show=True):
         pts = self.pts
@@ -25,9 +48,8 @@ class DataAnalysis:
         ax1 = fig.add_subplot(1,2,1)
         ax2 = fig.add_subplot(1, 2, 2)
         for eps in eps_list:
-            Qeps_list = Q_eps(pts, r=r, eps=eps, load_cached=True, dir_name=self.dataset_name, sample_freq=int(self.T/4))
-            Q_eigs_list = computeQ_eigVals(Qeps_list, r=r, eps=eps, k=15, load_cached=True, dir_name=self.dataset_name)
-            Q_eigVals, Q_eigVecs = Q_eigs_list[-1]
+            Q_eigs = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
+            Q_eigVals, Q_eigVecs = Q_eigs
             Q_eigVecs = Q_eigVecs.T
             L_eigVals = (Q_eigVals - 1)/eps
             color = next(colors)
@@ -62,21 +84,20 @@ class DataAnalysis:
             return foundInds[0]
 
         for eps in eps_list:
-            Qeps_list = Q_eps(pts, r=r, eps=eps, load_cached=True, dir_name=self.dataset_name, sample_freq=int(self.T/4))
-            # Qeps_list = Qeps_list[::int(len(Qeps_list)/2)]
-            time_slices = t_vec[-1]*range(len(Qeps_list))/len(Qeps_list)
-            fig, axes = plt.subplots(len(Qeps_list), 1, figsize=(12,18), constrained_layout=True)
-            Q_eigs_list = computeQ_eigVals(Qeps_list, r=r, eps=eps, k=15, load_cached=True, dir_name=self.dataset_name)
-            for idx, Qeps in enumerate(Qeps_list):
-                t = time_slices[idx]
-                Q_eigVals, Q_eigVecs = Q_eigs_list[idx]
+            Q_eigs = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
+            fig, axes = plt.subplots(self.time_slices.size, 1, figsize=(12,18), constrained_layout=True)
+            for idx, t_slice in enumerate(self.time_slices):
+                t = t_vec[t_slice]
+                Q_eigVals, Q_eigVecs = Q_eigs
                 Q_eigVecs = Q_eigVecs.T
                 L_eigVals = (Q_eigVals - 1)/eps
                 # deltaEigs = computeLargeDiffSet(L_eigVals, n_largest=3)
                 deltaEigs = self.largest_gap_eigs
                 eigFunc = Q_eigVecs[1].reshape(img_shape)
                 eigFunc = np.flip(eigFunc, axis=0)
-                im = axes[idx].imshow(np.real(eigFunc), cmap=cmap)
+                pts_t = pts[:, t_slice, :]
+                # x_grid, y_grid = np.meshgrid(pts_t)
+                scat = axes[idx].scatter(pts_t[:,0], pts_t[:,1], c=eigFunc, s=10, cmap=cmap)
                 axes[idx].set_title('Second Eigenfunction of ' + r'$Q_{\epsilon}$' + ' for time slice t = ' +str(t))
                 axes[idx].set_xlabel('x')
                 axes[idx].set_ylabel('y')
@@ -94,14 +115,11 @@ class DataAnalysis:
         img_shape = self.img_shape
         t_vec = self.t_vec
         for eps in eps_list:
-            Qeps_list = Q_eps(pts, r=r, eps=eps, load_cached=True, dir_name=self.dataset_name, sample_freq=int(self.T/4))
-            # Qeps_list = Qeps_list[::int(len(Qeps_list)/2)]
-            Q_eigs_list = computeQ_eigVals(Qeps_list, r=r, eps=eps, k=15, load_cached=True, dir_name=self.dataset_name)
-            time_slices = t_vec[-1]*range(len(Qeps_list))/len(Qeps_list)
-            fig, axes = plt.subplots(len(Qeps_list), 1, figsize=(12,18), constrained_layout=True)
-            for idx, Qeps in enumerate(Qeps_list):
-                t = time_slices[idx]
-                Q_eigVals, Q_eigVecs = Q_eigs_list[idx]
+            Q_eigs = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
+            fig, axes = plt.subplots(self.time_slices.size, 1, figsize=(12,18), constrained_layout=True)
+            for idx, t_slice in enumerate(self.time_slices):
+                t = t_vec[t_slice]
+                Q_eigVals, Q_eigVecs = Q_eigs
                 Q_eigVecs = Q_eigVecs.T
                 L_eigVals = (Q_eigVals - 1)/eps
                 # deltaEigs = computeLargeDiffSet(L_eigVals, n_largest=1)
@@ -109,11 +127,16 @@ class DataAnalysis:
                 label_space = cluster_eigVectors(Q_eigVecs[:n_clusters], n_clusters=n_clusters)
                 label_space = np.reshape(label_space, img_shape)
                 # label_space = np.flip(label_space, axis=0)
-                im = axes[idx].imshow(np.real(label_space), cmap=cmap)
-                axes[idx].set_title('2 Clustering of ' + r'$Q_{\epsilon}$' + ' for time slice t = ' +str(t))
+                pts_t = pts[:, t_slice, :]
+                scat = axes[idx].scatter(pts_t[:,0], pts_t[:,1], c=label_space, s=10, cmap=cmap)
+                axes[idx].set_title(str(n_clusters) + ' Clustering of ' + r'$Q_{\epsilon}$' + ' for time slice t = ' + str(t))
                 axes[idx].set_xlabel('x')
                 axes[idx].set_ylabel('y')
                 # plt.colorbar(im)
             fig.suptitle(r'$\epsilon=$' + str(eps))
         if show == True:
             plt.show()
+
+
+    def discard_data(self, remaining_pts_num=500):
+        m = pts.shape[0]

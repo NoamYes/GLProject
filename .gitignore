@@ -133,3 +133,5 @@ trajectories_z.npy.npz
 Q_eps.npy
 data/
 double_gyre_trajectories.mp4
+doubleGyre_animation.gif
+bickleyJet_animation.gif

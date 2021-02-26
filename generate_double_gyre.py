@@ -37,28 +37,3 @@ def generate_trajectories(x_vec, y_vec, t_vec, load_cached=True):
                 trajectories[row_idx][col_idx] = sol
         np.save('./data/trajectories.npy', trajectories)
     return trajectories, x_grid, y_grid
-
-def animate_double_gyre_flow(x_vec, y_vec, t_vec, fig=None, show=True, save=False):
-    trajectories, x_grid, y_grid = generate_trajectories(x_vec, y_vec, t_vec, load_cached=True)
-    if fig == None:
-        fig, ax = plt.subplots()
-    lines = []
-    for start_x in range(0, x_vec.size, 4):
-        for start_y in range(0, y_vec.size, 4):
-            trajectory = trajectories[:][start_y, start_x]
-            lines.append(ax.scatter(trajectory[0], trajectory[1]))
-    c = x_grid
-    scat = ax.scatter(x_grid, y_grid, c=c, s=10, cmap='turbo')
-
-    def connect(i):
-        scat.set_offsets(trajectories[:,:,i,:].reshape(-1,2))
-        return scat, 
-
-    anim = animation.FuncAnimation(fig, connect, range(t_vec.size), interval=50)
-    if save == True:
-        anim.save('double_gyre_trajectories.mp4')
-    plt.xlim([0, 2])
-    plt.ylim([0, 1])
-    plt.title('Samples of ' + str(len(lines)) + ' Trajectories computed by the solving the ODE')
-    if show == True:
-        plt.show()

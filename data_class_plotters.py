@@ -11,7 +11,7 @@ from pathlib import Path
 
 
 class DataAnalysis:
-    def __init__(self, pts, dataset_name, t_vec, img_shape, largest_gap_eigs, time_samples):
+    def __init__(self, pts, dataset_name, t_vec, img_shape, largest_gap_eigs, k_eigVals, time_samples):
         self.pts = pts
         self.dataset_name = dataset_name 
         self.t_vec = t_vec
@@ -19,6 +19,7 @@ class DataAnalysis:
         self.largest_gap_eigs = largest_gap_eigs
         self.T = t_vec.size
         self.time_slices = np.linspace(0, t_vec.size-5, time_samples).astype('int')
+        self.k_eigVals = k_eigVals
         Path('./data/' + str(dataset_name)).mkdir(parents=True, exist_ok=True)
 
 
@@ -52,7 +53,7 @@ class DataAnalysis:
         ax1 = fig.add_subplot(1,2,1)
         ax2 = fig.add_subplot(1, 2, 2)
         for eps in eps_list:
-            Q_eigs = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
+            Q_eigs = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name, k_eigVals=self.k_eigVals)
             Q_eigVals, Q_eigVecs = Q_eigs
             Q_eigVecs = Q_eigVecs.T
             L_eigVals = (Q_eigVals - 1)/eps
@@ -73,9 +74,9 @@ class DataAnalysis:
             plt.show()
         return
 
-    ## 3 - Eigenfunction at t = 0 and t = 19.5
+    ## Eigenfunctions
 
-    def plot_eigenfuncs_at_times(self, r, eps_list, cmap=None, show=True):
+    def plot_eigenfunc_at_times(self, r, eps_list, eig_idx=2, cmap=None, show=True):
         pts = self.pts
         m = pts.shape[0]
         img_shape = self.img_shape
@@ -97,12 +98,46 @@ class DataAnalysis:
                 L_eigVals = (Q_eigVals - 1)/eps
                 # deltaEigs = computeLargeDiffSet(L_eigVals, n_largest=3)
                 deltaEigs = self.largest_gap_eigs
-                eigFunc = Q_eigVecs[2].reshape(img_shape)
+                eigFunc = Q_eigVecs[eig_idx]
                 eigFunc = np.flip(eigFunc, axis=0)
                 pts_t = pts[:, t_slice, :]
                 # x_grid, y_grid = np.meshgrid(pts_t)
                 scat = axes[idx].scatter(pts_t[:,0], pts_t[:,1], c=eigFunc, s=10, cmap=cmap)
-                axes[idx].set_title('Second Eigenfunction of ' + r'$Q_{\epsilon}$' + ' for time slice t = ' +str(t))
+                axes[idx].set_title( str(eig_idx) + ' Eigenfunction of ' + r'$Q_{\epsilon}$' + ' for time slice t = ' +str(t))
+                axes[idx].set_xlabel('x')
+                axes[idx].set_ylabel('y')
+                # plt.colorbar(im)
+            fig.suptitle(r'$\epsilon=$' + str(eps))
+        if show == True:
+            plt.show()
+
+    def plot_eigenfuncs_at_times_eps(self, r, eps=0.02, eig_inds=[2], cmap=None, show=True):
+        pts = self.pts
+        m = pts.shape[0]
+        img_shape = self.img_shape
+        t_vec = self.t_vec
+        def computeLargeDiffSet(eigVals, n_largest=3):
+            diffs = np.abs(eigVals[:-1] - eigVals[1:])
+            # foundInds = diffs.argsort()[-n_largest:][::-1]
+            mean_diff = np.mean(diffs)
+            foundInds = np.where(diffs > mean_diff)
+            return foundInds[0]
+        Q_eigs = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
+        for idx, eig_ind in enumerate(eig_inds):
+            fig, axes = plt.subplots(self.time_slices.size, 1, figsize=(12,18), constrained_layout=True)
+            for idx, t_slice in enumerate(self.time_slices):
+                t = t_vec[t_slice]
+                Q_eigVals, Q_eigVecs = Q_eigs
+                Q_eigVecs = Q_eigVecs.T
+                L_eigVals = (Q_eigVals - 1)/eps
+                # deltaEigs = computeLargeDiffSet(L_eigVals, n_largest=3)
+                deltaEigs = self.largest_gap_eigs
+                eigFunc = Q_eigVecs[eig_ind]
+                eigFunc = np.flip(eigFunc, axis=0)
+                pts_t = pts[:, t_slice, :]
+                # x_grid, y_grid = np.meshgrid(pts_t)
+                scat = axes[idx].scatter(pts_t[:,0], pts_t[:,1], c=eigFunc, s=10, cmap=cmap)
+                axes[idx].set_title( str(eig_ind) + ' Eigenfunction of ' + r'$Q_{\epsilon}$' + ' for time slice t = ' +str(t))
                 axes[idx].set_xlabel('x')
                 axes[idx].set_ylabel('y')
                 # plt.colorbar(im)
@@ -116,7 +151,7 @@ class DataAnalysis:
         Q_eigs = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
         Q_eigVals, Q_eigVecs = Q_eigs
         Q_eigVecs = Q_eigVecs.T
-        label_space = cluster_eigVectors(Q_eigVecs[:n_clusters], n_clusters=n_clusters)
+        label_space = cluster_eigVectors(Q_eigVecs[2:n_clusters], n_clusters=n_clusters)
         return label_space
 
     def cluster_plot(self, r, eps_list, n_clusters=2, cmap=None, show=True):

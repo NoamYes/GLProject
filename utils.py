@@ -16,14 +16,14 @@ def k_eps(x1, x2, eps):
     return h(np.norm(x1-x2)**2/eps)
 
 ## Returns a list of Q_eps for given frequency (every "freq" samples)
-def Q_eps(pts, r, eps, time_slices=4, load_cached=True,  dir_name=None):
+def Q_eps(pts, r, eps, time_slices=4, load_cached=True,  dir_name=None, k_eigVals=15):
     Q_file = 'data/' + str(dir_name) + '/Q_' + str(r) + '_' + str(eps) + '.npy'
     eigs_file = 'data/' + str(dir_name) + '/Q_eigs_' + str(r) + '_' + str(eps) + '.npy'
     if os.path.isfile(eigs_file):
         Q_eigs = np.load(eigs_file, allow_pickle=True)[()]
     else:
         if os.path.isfile(Q_file):
-            Qeps = np.load(eigs_file, allow_pickle=True)[()]
+            Qeps = np.load(Q_file, allow_pickle=True)[()]
         else:
             m = pts.shape[0]
             T = pts.shape[1]
@@ -42,7 +42,8 @@ def Q_eps(pts, r, eps, time_slices=4, load_cached=True,  dir_name=None):
                 B = sparse.diags(depsi) @ Pepsi.T @ Pepsi
                 Q = Q + B
             Qeps = Q / T
-        Q_eigs = computeQ_eigVals(Qeps, k=15)
+            np.save(Q_file, Qeps) 
+        Q_eigs = computeQ_eigVals(Qeps, k=k_eigVals)
         np.save(eigs_file, Q_eigs) 
 
         
@@ -57,7 +58,7 @@ def assemble_sim_matrix(idx, D, m, eps):
     return K
 
 def computeQ_eigVals(Qeps, k=15):
-    eigs_res = eigsh(Qeps, k=k, which='LM')
+    eigs_res = eigs(Qeps, k=k, which='LM')
     Q_eigenVals, Q_eigenVecs = eigs_res
     Q_eigenVals = np.real(Q_eigenVals)
     Q_eigenVecs = np.real(Q_eigenVecs)

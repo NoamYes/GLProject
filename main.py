@@ -34,7 +34,7 @@ r = 2
 ## Create class of data analysis for the double gyre dataset
 
 from data_class_plotters import DataAnalysis
-double_gyre_class = DataAnalysis(pts, 'doubleGyre', t_vec, img_shape, largest_gap_eigs, time_samples=4)
+double_gyre_class = DataAnalysis(pts, 'doubleGyre', t_vec, img_shape, largest_gap_eigs, k_eigVals=15,time_samples=4)
 
 ## Animate the trajectories 
 
@@ -48,7 +48,7 @@ double_gyre_class = DataAnalysis(pts, 'doubleGyre', t_vec, img_shape, largest_ga
 
 ## Plot the second eigenfunction at various times
 
-# double_gyre_class.plot_eigenfuncs_at_times(r, eps_list, cmap=plt.cm.turbo, show=True)
+# double_gyre_class.plot_eigenfunc_at_times(r, eps_list, eig_idx=2, cmap=plt.cm.turbo, show=True)
 
 ## Cluster into 2 labels
 
@@ -56,7 +56,7 @@ double_gyre_class = DataAnalysis(pts, 'doubleGyre', t_vec, img_shape, largest_ga
 
 ## Cluster into 3 labels
 
-double_gyre_class.cluster_plot(r, eps_list, n_clusters=3, cmap='Dark2', show=False)
+# double_gyre_class.cluster_plot(r, eps_list, n_clusters=3, cmap='Dark2', show=True)
 
 ## Cluster into 4 labels
 
@@ -93,7 +93,7 @@ largest_gap_eigs = [1, 2, 8] # eigVecs indentified as before largest step
 
 from data_class_plotters import DataAnalysis
 
-bickley_jet_class = DataAnalysis(pts, 'bickleyJet', t_vec, img_shape, largest_gap_eigs, time_samples=4)
+bickley_jet_class = DataAnalysis(pts, 'bickleyJet', t_vec, img_shape, largest_gap_eigs, k_eigVals=20, time_samples=6)
 
 ## Animate the data in time
 
@@ -103,19 +103,19 @@ bickley_jet_class = DataAnalysis(pts, 'bickleyJet', t_vec, img_shape, largest_ga
 
 ## Plot the largest eigenfunctions of the Q_eps and the Laplacian
 
-# eps_list = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
-eps_list = [0.02]
+eps_list = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
+# eps_list = [0.01, 0.02]
 r = 2
 
 bickley_jet_class.eig_vals_plot(r, eps_list, fig=None, show=True)
 
 ## Plot the eigenfunctions at various times
 
-bickley_jet_class.plot_eigenfuncs_at_times(r, eps_list, cmap='Dark2', show=True)
+bickley_jet_class.plot_eigenfuncs_at_times_eps(r, eps=0.02, eig_inds=[2, 3, 4], cmap=plt.cm.turbo, show=True)
 
-## Cluster into 2 labels
+## Cluster into 9 labels
 
-bickley_jet_class.cluster_plot(r, eps_list, n_clusters=9, cmap='Dark2', show=True)
+bickley_jet_class.cluster_plot(r, eps_list, n_clusters=9, cmap='Dark2', show=True )
 
 
 print('ya')

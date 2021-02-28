@@ -53,7 +53,7 @@ class DataAnalysis:
         ax1 = fig.add_subplot(1,2,1)
         ax2 = fig.add_subplot(1, 2, 2)
         for eps in eps_list:
-            Q_eigs = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name, k_eigVals=self.k_eigVals)
+            Q_eigs, Q = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name, k_eigVals=self.k_eigVals)
             Q_eigVals, Q_eigVecs = Q_eigs
             Q_eigVecs = Q_eigVecs.T
             L_eigVals = (Q_eigVals - 1)/eps
@@ -63,7 +63,6 @@ class DataAnalysis:
             ax2.scatter(range(L_eigVals.size), L_eigVals, s=20, c=color, marker=marker, label=r'$\epsilon=$'+str(eps))      
             ax1.legend(loc='upper right')
             ax2.legend(loc='upper right')
-
         ax1.set_xlabel('n')
         ax1.set_ylabel(r'$\lambda_n$')
         ax1.set_title('Scatter eigenValues of ' + r'$Q_{\epsilon}$' + ' for various ' + r'$\epsilon$' + ' values')
@@ -89,7 +88,7 @@ class DataAnalysis:
             return foundInds[0]
 
         for eps in eps_list:
-            Q_eigs = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
+            Q_eigs, Q = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
             fig, axes = plt.subplots(self.time_slices.size, 1, figsize=(12,18), constrained_layout=True)
             for idx, t_slice in enumerate(self.time_slices):
                 t = t_vec[t_slice]
@@ -122,7 +121,7 @@ class DataAnalysis:
             mean_diff = np.mean(diffs)
             foundInds = np.where(diffs > mean_diff)
             return foundInds[0]
-        Q_eigs = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
+        Q_eigs, Q = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
         for idx, eig_ind in enumerate(eig_inds):
             fig, axes = plt.subplots(self.time_slices.size, 1, figsize=(12,18), constrained_layout=True)
             for idx, t_slice in enumerate(self.time_slices):
@@ -133,7 +132,7 @@ class DataAnalysis:
                 # deltaEigs = computeLargeDiffSet(L_eigVals, n_largest=3)
                 deltaEigs = self.largest_gap_eigs
                 eigFunc = Q_eigVecs[eig_ind]
-                eigFunc = np.flip(eigFunc, axis=0)
+                # eigFunc = np.flip(eigFunc, axis=0)
                 pts_t = pts[:, t_slice, :]
                 # x_grid, y_grid = np.meshgrid(pts_t)
                 scat = axes[idx].scatter(pts_t[:,0], pts_t[:,1], c=eigFunc, s=10, cmap=cmap)
@@ -148,10 +147,10 @@ class DataAnalysis:
 
     ##  Clustering
     def cluster_labels(self,pts, r, eps, n_clusters=2):
-        Q_eigs = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
+        Q_eigs, Q = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
         Q_eigVals, Q_eigVecs = Q_eigs
         Q_eigVecs = Q_eigVecs.T
-        label_space = cluster_eigVectors(Q_eigVecs[2:n_clusters], n_clusters=n_clusters)
+        label_space = cluster_eigVectors(Q_eigVecs[1:n_clusters], n_clusters=n_clusters)
         return label_space
 
     def cluster_plot(self, r, eps_list, n_clusters=2, cmap=None, show=True):
@@ -162,7 +161,7 @@ class DataAnalysis:
         figs, axises = [], []
         for eps in eps_list:
             label_space = self.cluster_labels(pts, r, eps, n_clusters=n_clusters)
-            label_space = np.reshape(label_space, img_shape)
+            # label_space = np.reshape(label_space, img_shape)
             # label_space = np.flip(label_space, axis=0)
             fig, axes = plt.subplots(self.time_slices.size, 1, figsize=(12,18), constrained_layout=True)
             figs.append(fig)
@@ -179,6 +178,26 @@ class DataAnalysis:
         if show == True:
             plt.show()
         return figs, axises
+
+    def embed_into_eigens(self, r, eps, eig_inds, n_clusters=2, cmap=None, show=True):
+        Q_eigs, Q = Q_eps(self.pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
+        Q_eigVals, Q_eigVecs = Q_eigs
+        Q_eigVecs = Q_eigVecs.T
+        eig_inds.sort()
+        eigs_to_project_on = Q_eigVecs[eig_inds]
+        pts_projection = Q @ eigs_to_project_on.T
+        label_space = self.cluster_labels(self.pts, r, eps, n_clusters=n_clusters)
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        xs, ys, zs = pts_projection[:,0], pts_projection[:,1], pts_projection[:,2]
+        ax.scatter(xs, ys, zs, marker='o', s=10, c=label_space, cmap=cmap)
+        ax.set_xlabel('E' + str(eig_inds[0]))
+        ax.set_ylabel('E' + str(eig_inds[1]))
+        ax.set_zlabel('E' + str(eig_inds[2]))
+        ax.set_title('Embedding using the eigenfunctions ' + str(eig_inds))
+        fig.suptitle(r'$\epsilon=$' + str(eps))
+        if show == True:
+            plt.show()
 
 
     def discard_data(self, remaining_pts_num=500, destroy_rate=0.8, seed=0):

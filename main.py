@@ -107,15 +107,21 @@ eps_list = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
 # eps_list = [0.01, 0.02]
 r = 2
 
-bickley_jet_class.eig_vals_plot(r, eps_list, fig=None, show=True)
+# bickley_jet_class.eig_vals_plot(r, eps_list, fig=None, show=True)
 
 ## Plot the eigenfunctions at various times
 
-bickley_jet_class.plot_eigenfuncs_at_times_eps(r, eps=0.02, eig_inds=[2, 3, 4], cmap=plt.cm.turbo, show=True)
+# bickley_jet_class.plot_eigenfuncs_at_times_eps(r, eps=0.05, eig_inds=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], cmap=plt.cm.turbo, show=True)
 
 ## Cluster into 9 labels
 
-bickley_jet_class.cluster_plot(r, eps_list, n_clusters=9, cmap='Dark2', show=True )
+eps_list = [0.05]
+# bickley_jet_class.cluster_plot(r, eps_list, n_clusters=9, cmap='Dark2', show=True )
 
+## Embed onto eigenvectors
+
+eps = 0.05
+eig_inds = [0, 1, 3]
+bickley_jet_class.embed_into_eigens(r, eps, eig_inds, n_clusters=9, cmap='Dark2', show=True)
 
 print('ya')

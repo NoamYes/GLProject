@@ -19,35 +19,32 @@ def k_eps(x1, x2, eps):
 def Q_eps(pts, r, eps, time_slices=4, load_cached=True,  dir_name=None, k_eigVals=15):
     Q_file = 'data/' + str(dir_name) + '/Q_' + str(r) + '_' + str(eps) + '.npy'
     eigs_file = 'data/' + str(dir_name) + '/Q_eigs_' + str(r) + '_' + str(eps) + '.npy'
-    if os.path.isfile(eigs_file):
+    if os.path.isfile(eigs_file) and os.path.isfile(Q_file):
         Q_eigs = np.load(eigs_file, allow_pickle=True)[()]
+        Qeps = np.load(Q_file, allow_pickle=True)[()]
     else:
-        if os.path.isfile(Q_file):
-            Qeps = np.load(Q_file, allow_pickle=True)[()]
-        else:
-            m = pts.shape[0]
-            T = pts.shape[1]
-            Q = sparse.coo_matrix((m,m), dtype=float)
-            rang = np.sqrt(r*eps)
-            for t in tqdm(range(T)):
-                data = pts[:,t,:]
-                res = sparse.csr_matrix(neighbors.radius_neighbors_graph(data, radius=rang, mode='distance'))
-                idx_list = np.split(res.indices, res.indptr)[1:-1]
-                K = assemble_sim_matrix(idx_list, res, m, eps)
-                q = 1/K.sum(axis=1)
-                q = np.squeeze(np.asarray(q))
-                Pepsi = sparse.diags(q) @ K
-                depsi = 1/Pepsi.sum(axis=0)
-                depsi = np.squeeze(np.asarray(depsi))
-                B = sparse.diags(depsi) @ Pepsi.T @ Pepsi
-                Q = Q + B
-            Qeps = Q / T
-            np.save(Q_file, Qeps) 
+        m = pts.shape[0]
+        T = pts.shape[1]
+        Q = sparse.coo_matrix((m,m), dtype=float)
+        rang = np.sqrt(r*eps)
+        for t in tqdm(range(T)):
+            data = pts[:,t,:]
+            res = sparse.csr_matrix(neighbors.radius_neighbors_graph(data, radius=rang, mode='distance'))
+            idx_list = np.split(res.indices, res.indptr)[1:-1]
+            K = assemble_sim_matrix(idx_list, res, m, eps)
+            q = 1/K.sum(axis=1)
+            q = np.squeeze(np.asarray(q))
+            Pepsi = sparse.diags(q) @ K
+            depsi = 1/Pepsi.sum(axis=0)
+            depsi = np.squeeze(np.asarray(depsi))
+            B = sparse.diags(depsi) @ Pepsi.T @ Pepsi
+            Q = Q + B
+        Qeps = Q / T
+        np.save(Q_file, Qeps) 
         Q_eigs = computeQ_eigVals(Qeps, k=k_eigVals)
         np.save(eigs_file, Q_eigs) 
 
-        
-    return Q_eigs
+    return Q_eigs, Qeps
 
 def assemble_sim_matrix(idx, D, m, eps):
     x = np.concatenate([idx*np.ones(val.size) for idx, val in enumerate(idx)])

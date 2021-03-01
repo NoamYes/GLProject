@@ -150,7 +150,7 @@ class DataAnalysis:
         Q_eigs, Q = Q_eps(pts, r=r, eps=eps, time_slices=self.time_slices, load_cached=True, dir_name=self.dataset_name)
         Q_eigVals, Q_eigVecs = Q_eigs
         Q_eigVecs = Q_eigVecs.T
-        label_space = cluster_eigVectors(Q_eigVecs[1:n_clusters], n_clusters=n_clusters)
+        label_space = cluster_eigVectors(Q_eigVecs[1:n_clusters+1], n_clusters=n_clusters)
         return label_space
 
     def cluster_plot(self, r, eps_list, n_clusters=2, cmap=None, show=True):

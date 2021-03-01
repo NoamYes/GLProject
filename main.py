@@ -120,8 +120,8 @@ eps_list = [0.05]
 
 ## Embed onto eigenvectors
 
-eps = 0.05
-eig_inds = [0, 1, 3]
+eps = 0.02
+eig_inds = [2, 4, 5]
 bickley_jet_class.embed_into_eigens(r, eps, eig_inds, n_clusters=9, cmap='Dark2', show=True)
 
 print('ya')

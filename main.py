@@ -20,7 +20,7 @@ img_shape = x_grid.shape
 
 
 ## Flatten trajectories data to m tranjectories
-trajectories = trajectories.reshape(-1, trajectories.shape[-2], trajectories.shape[-1])
+trajectories = np.array(trajectories).reshape(-1, trajectories.shape[-2], trajectories.shape[-1])
 m = trajectories.shape[0]
 pts = trajectories
 largest_gap_eigs = [2, 3, 8] # eigVecs indentified as before largest step
@@ -38,38 +38,38 @@ double_gyre_class = DataAnalysis(pts, 'doubleGyre', t_vec, img_shape, largest_ga
 
 ## Animate the trajectories 
 
-# double_gyre_class.animate_data(fig=None, cmap='turbo', show=False, save=True)
+# double_gyre_class.animate_data(fig=None, cmap='turbo', show=True, save=True)
 
 ## Compute Qeps / Load from pre-computed
 
 ## Plot the largest eigenVals of the Q_eps and the Laplacian
 
-# double_gyre_class.eig_vals_plot(r, eps_list, fig=None, show=True)
+double_gyre_class.eig_vals_plot(r, eps_list, fig=None, show=True)
 
 ## Plot the second eigenfunction at various times
 
-# double_gyre_class.plot_eigenfunc_at_times(r, eps_list, eig_idx=2, cmap=plt.cm.turbo, show=True)
+double_gyre_class.plot_eigenfunc_at_times(r, eps_list, eig_idx=2, cmap='plasma', show=True)
 
 ## Cluster into 2 labels
 
-# double_gyre_class.cluster_plot(r, eps_list, n_clusters=2, cmap='Dark2', show=True)
+double_gyre_class.cluster_plot(r, eps_list, n_clusters=2, cmap='Dark2', show=True)
 
 ## Cluster into 3 labels
 
-# double_gyre_class.cluster_plot(r, eps_list, n_clusters=3, cmap='Dark2', show=True)
+double_gyre_class.cluster_plot(r, eps_list, n_clusters=3, cmap='Dark2', show=True)
 
 ## Cluster into 4 labels
 
-# double_gyre_class.cluster_plot(r, eps_list, n_clusters=4, cmap='Dark2', show=True)
+double_gyre_class.cluster_plot(r, eps_list, n_clusters=4, cmap='Dark2', show=True)
 
 ## Missing Data Section
 
 # eps_list = [0.01]
 # missing_data, discarded_pts = double_gyre_class.discard_data(remaining_pts_num=500, destroy_rate=0.8)
 # missing_gyre_class = DataAnalysis(missing_data, 'missingGyre', t_vec, img_shape, largest_gap_eigs, time_samples=4)
-# missing_gyre_class.eig_vals_plot(r, eps_list, fig=None, show=False)
+# missing_gyre_class.eig_vals_plot(r, eps_list, fig=None, show=True)
 # labeled_data = missing_gyre_class.cluster_labels(missing_data, r, eps=0.01, n_clusters=3)
-# figs, axises = double_gyre_class.cluster_plot(r, [0.004], n_clusters=3, cmap='Dark2', show=False)
+# figs, axises = double_gyre_class.cluster_plot(r, [0.004], n_clusters=3, cmap='Dark2', show=True)
 # fig, axes = figs[-1], axises[-1]
 # axes[0].scatter(discarded_pts[:,0,0], discarded_pts[:,0,1], c=labeled_data, s=10, cmap='viridis')
 # plt.show()
@@ -97,7 +97,7 @@ bickley_jet_class = DataAnalysis(pts, 'bickleyJet', t_vec, img_shape, largest_ga
 
 ## Animate the data in time
 
-# bickley_jet_class.animate_data(fig=None, cmap='turbo', show=False, save=True)
+# bickley_jet_class.animate_data(fig=None, cmap='turbo', show=True, save=True)
 
 ## Compute Qeps / Load from pre-computed
 
@@ -107,16 +107,16 @@ eps_list = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5]
 # eps_list = [0.01, 0.02]
 r = 2
 
-# bickley_jet_class.eig_vals_plot(r, eps_list, fig=None, show=True)
+bickley_jet_class.eig_vals_plot(r, eps_list, fig=None, show=True)
 
 ## Plot the eigenfunctions at various times
 
-# bickley_jet_class.plot_eigenfuncs_at_times_eps(r, eps=0.05, eig_inds=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], cmap=plt.cm.turbo, show=True)
+bickley_jet_class.plot_eigenfuncs_at_times_eps(r, eps=0.05, eig_inds=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9], cmap='plasma', show=True)
 
 ## Cluster into 9 labels
 
 eps_list = [0.05]
-# bickley_jet_class.cluster_plot(r, eps_list, n_clusters=9, cmap='Dark2', show=True )
+bickley_jet_class.cluster_plot(r, eps_list, n_clusters=9, cmap='Dark2', show=True )
 
 ## Embed onto eigenvectors
 

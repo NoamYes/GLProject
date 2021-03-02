@@ -38,7 +38,7 @@ double_gyre_class = DataAnalysis(pts, 'doubleGyre', t_vec, img_shape, largest_ga
 
 ## Animate the trajectories 
 
-# double_gyre_class.animate_data(fig=None, cmap='turbo', show=True, save=True)
+double_gyre_class.animate_data(fig=None, cmap='turbo', show=False, save=True)
 
 ## Compute Qeps / Load from pre-computed
 
@@ -52,15 +52,15 @@ double_gyre_class.plot_eigenfunc_at_times(r, eps_list, eig_idx=2, cmap='plasma',
 
 ## Cluster into 2 labels
 
-double_gyre_class.cluster_plot(r, eps_list, n_clusters=2, cmap='Dark2', show=True)
+double_gyre_class.cluster_plot(r, eps_list, n_clusters=2, cmap='tab10', show=True)
 
 ## Cluster into 3 labels
 
-double_gyre_class.cluster_plot(r, eps_list, n_clusters=3, cmap='Dark2', show=True)
+double_gyre_class.cluster_plot(r, eps_list, n_clusters=3, cmap='tab10', show=True)
 
 ## Cluster into 4 labels
 
-double_gyre_class.cluster_plot(r, eps_list, n_clusters=4, cmap='Dark2', show=True)
+double_gyre_class.cluster_plot(r, eps_list, n_clusters=4, cmap='tab10', show=True)
 
 ## Missing Data Section
 
@@ -97,7 +97,7 @@ bickley_jet_class = DataAnalysis(pts, 'bickleyJet', t_vec, img_shape, largest_ga
 
 ## Animate the data in time
 
-# bickley_jet_class.animate_data(fig=None, cmap='turbo', show=True, save=True)
+bickley_jet_class.animate_data(fig=None, cmap='turbo', show=False, save=True)
 
 ## Compute Qeps / Load from pre-computed
 
@@ -115,13 +115,13 @@ bickley_jet_class.plot_eigenfuncs_at_times_eps(r, eps=0.05, eig_inds=[0, 1, 2, 3
 
 ## Cluster into 9 labels
 
-eps_list = [0.05]
-bickley_jet_class.cluster_plot(r, eps_list, n_clusters=9, cmap='Dark2', show=True )
+eps_list = [ 0.02, 0.04, 0.05]
+bickley_jet_class.cluster_plot(r, eps_list, n_clusters=9, cmap='tab10', show=True )
 
 ## Embed onto eigenvectors
 
-eps = 0.02
-eig_inds = [2, 4, 5]
-bickley_jet_class.embed_into_eigens(r, eps, eig_inds, n_clusters=9, cmap='Dark2', show=True)
+eps = 0.05
+eig_inds = [1, 4, 5]
+bickley_jet_class.embed_into_eigens(r, eps, eig_inds, n_clusters=9, cmap='tab10', show=True)
 
 print('ya')
